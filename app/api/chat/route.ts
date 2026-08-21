@@ -47,13 +47,12 @@ async function getRelevantContext(
   return { contextText, sources };
 }
 
-// دالة استخراج وتخزين الذكريات في الخلفية
 async function extractAndSaveMemory(apiKey: string, userId: string, userMessage: string) {
   if (!userMessage || userMessage.trim().length < 8) return;
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
 
     const extractionPrompt = `
 أنت جزء من نظام ذكاء اصطناعي. حلل الرسالة التالية واستخرج منها فقط الحقائق المستمرة الخاصة بالمريض مثل (الاسم، العمر، الوظيفة، التشخيص المسبق، مسببات الحساسية عنده، الأدوية التي يستخدمها، المشاكل النفسية/الجسدية المزمنة).
@@ -77,7 +76,6 @@ async function extractAndSaveMemory(apiKey: string, userId: string, userMessage:
   }
 }
 
-// دالة حفظ المحادثة بداخل Patient في MongoDB
 async function saveChatToPatientHistory(
   userEmail: string,
   chatId: string,
@@ -189,7 +187,7 @@ ${userMemoriesText || "لا توجد ذكريات سابقة."}
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.5-flash",
       systemInstruction: systemPrompt,
     });
 
