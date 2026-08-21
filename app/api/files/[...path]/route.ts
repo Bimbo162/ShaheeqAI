@@ -4,9 +4,10 @@ import path from "path";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
-  const relPath = params.path.join("/");
+  const resolvedParams = await params;
+  const relPath = resolvedParams.path.join("/");
   const baseDir = path.join(process.cwd(), "knowledge");
   const filePath = path.join(baseDir, relPath);
 
