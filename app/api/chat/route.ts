@@ -54,7 +54,7 @@ async function extractAndSaveMemory(apiKey: string, userId: string, userMessage:
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     // تم تصحيح اسم النموذج إلى النموذج المعتمد السريع
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const extractionPrompt = `
 أنت جزء من نظام ذكاء اصطناعي. حلل الرسالة التالية واستخرج منها فقط الحقائق المستمرة الخاصة بالمريض مثل (الاسم، العمر، الوظيفة، التشخيص المسبق، مسببات الحساسية عنده، الأدوية التي يستخدمها، المشاكل النفسية/الجسدية المزمنة).
