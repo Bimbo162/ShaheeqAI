@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* --- إضافة متغيرات الألوان للـ Light والـ Dark Mode --- */
+@layer base {
+  :root {
+    /* ألوان اللايت مود (الافتراضي) */
+    --background: #f4f4f9;
+    --text-color: #111827; 
+  }
+
+  .dark {
+    /* ألوان الدارك مود (قريبة من الصورة بتاعتك) */
+    --background: #0b101e; 
+    --text-color: #ffffff;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--text-color);
+    transition: background-color 0.4s ease, color 0.4s ease;
+  }
+}
+
+/* --- الأنيميشن والكلاسات الخاصة بك (كما هي بدون تغيير) --- */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.55; }
+  50% { transform: scale(1.35); opacity: 1; }
+}
+
+@keyframes breatheRing {
+  0%, 100% { transform: scale(0.9); opacity: 0.25; }
+  50% { transform: scale(1.5); opacity: 0; }
+}
+
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.font-cairo {
+  font-family: var(--font-cairo), sans-serif;
+}
+
+.animate-msg-in {
+  animation: msgIn 0.35s ease-out both;
+}
+
+.breathe-dot {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+.breathe-ring {
+  animation: breatheRing 4s ease-in-out infinite;
+}
+
+main::-webkit-scrollbar { width: 6px; }
+main::-webkit-scrollbar-thumb { background: #1F4A43; border-radius: 10px; }
+main::-webkit-scrollbar-track { background: transparent; }

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shaheeq AI - Project Presentation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Cairo', sans-serif; background-color: #090d16; color: #f8fafc; overflow: hidden; }
+    .slide { display: none; height: 100vh; width: 100vw; padding: 3rem; box-sizing: border-box; }
+    .slide.active { display: flex; flex-direction: column; justify-content: center; align-items: center; animation: fadeIn 0.6s ease-out forwards; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .pulse-glow { animation: pulseGlow 3s infinite ease-in-out; }
+    @keyframes pulseGlow {
+      0%, 100% { filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.4)); transform: scale(1); }
+      50% { filter: drop-shadow(0 0 35px rgba(59, 130, 246, 0.8)); transform: scale(1.03); }
+    }
+  </style>
+</head>
+<body class="relative">
+
+  <!-- Slide 1: Title -->
+  <section class="slide active">
+    <div class="text-center max-w-4xl">
+      <div class="inline-block bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 px-4 py-1.5 rounded-full text-sm font-semibold mb-6">
+        🩺 المساعد الطبي الذكي لأمراض الجهاز التنفسي
+      </div>
+      <h1 class="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight">
+        Shaheeq<span class="text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-blue-500">AI</span>
+      </h1>
+      <p class="text-xl text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+        منظومة ذكاء اصطناعي تفاعلية تعتمد على تقنيات RAG لتقديم استشارات طبية موثوقة ومخصصة للمرضى.
+      </p>
+      <div class="text-slate-500 text-sm">استخدم أسهم الكيبورد <span class="bg-slate-800 px-2 py-1 rounded text-cyan-400 border border-slate-700">←</span> <span class="bg-slate-800 px-2 py-1 rounded text-cyan-400 border border-slate-700">→</span> للتنقل</div>
+    </div>
+  </section>
+
+  <!-- Slide 2: Problem & Solution -->
+  <section class="slide">
+    <h2 class="text-3xl font-bold mb-10 text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-blue-500">المشكلة والحل 💡</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl w-full">
+      <div class="bg-slate-900/80 border border-red-500/30 p-8 rounded-3xl shadow-lg relative overflow-hidden">
+        <div class="text-red-400 text-sm font-semibold mb-2">❌ التحدي والمشكلة</div>
+        <h3 class="text-xl font-bold mb-4 text-white">صعوبة الحصول على استشارة طبية دقيقة ومخصصة</h3>
+        <ul class="text-slate-300 text-sm space-y-3 list-disc list-inside leading-relaxed">
+          <li>نماذج الذكاء الاصطناعي العامة تعطي إجابات غير دقيقة (Hallucinations).</li>
+          <li>تجاهل التاريخ المرضي وعمر المريض عند تقديم النصيحة.</li>
+          <li>عدم ربط الإجابات بمصادر طبية موثوقة.</li>
+        </ul>
+      </div>
+
+      <div class="bg-slate-900/80 border border-emerald-500/30 p-8 rounded-3xl shadow-lg relative overflow-hidden">
+        <div class="text-emerald-400 text-sm font-semibold mb-2">✅ الحل مع Shaheeq AI</div>
+        <h3 class="text-xl font-bold mb-4 text-white">مساعد طبي ذكي يعتمد على RAG و Onboarding</h3>
+        <ul class="text-slate-300 text-sm space-y-3 list-disc list-inside leading-relaxed">
+          <li>جمع بيانات المريض (العمر، الحالة الصحية) في بداية المحادثة.</li>
+          <li>ربط الاستفسارات بقاعدة معرفية طبية موثوقة حصراً.</li>
+          <li>عرض المصادر الطبية مع كل إجابة لتعزيز الموثوقية.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 3: Practical & Tech Implementation -->
+  <section class="slide">
+    <h2 class="text-3xl font-bold mb-8 text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-blue-500">التطبيق العملي والمكتبات البرمجية 💻</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl w-full">
+      <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+        <div class="text-cyan-400 font-bold text-lg mb-3">🎨 Frontend & UI</div>
+        <ul class="text-slate-300 text-xs space-y-2 list-disc list-inside">
+          <li><span class="text-white font-semibold">Next.js 15 (App Router):</span> لبناء واجهة سريعة ودعم الـ SSR.</li>
+          <li><span class="text-white font-semibold">Tailwind CSS v4:</span> بناء التنسيقات الحديثة والتجاوب الكامل.</li>
+          <li><span class="text-white font-semibold">Framer Motion & Lucide React:</span> أنيميشن تفاعلي للـ Onboarding وأيقونات ملونة.</li>
+        </ul>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+        <div class="text-cyan-400 font-bold text-lg mb-3">⚡ Backend & AI Stack</div>
+        <ul class="text-slate-300 text-xs space-y-2 list-disc list-inside">
+          <li><span class="text-white font-semibold">Next.js API Routes:</span> معالجة الطلبات محلياً مع حماية المفاتيح (API Keys).</li>
+          <li><span class="text-white font-semibold">Google Generative AI / OpenAI SDK:</span> التواصل المباشر مع النماذج اللغوية.</li>
+          <li><span class="text-white font-semibold">MongoDB & Mongoose:</span> تخزين بيانات المستخدمين، الجلسات، وسجل الشات.</li>
+        </ul>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+        <div class="text-cyan-400 font-bold text-lg mb-3">🔍 RAG Pipeline & Vectors</div>
+        <ul class="text-slate-300 text-xs space-y-2 list-disc list-inside">
+          <li><span class="text-white font-semibold">Embedding Models:</span> تحويل المستندات الطبية إلى متجهات عدادية (Vectors).</li>
+          <li><span class="text-white font-semibold">Vector Database (e.g. Pinecone / MongoDB Atlas Search):</span> تخزين الـ Chunks للبحث السريع.</li>
+          <li><span class="text-white font-semibold">Similarity Search (Cosine Distance):</span> مطابقة سؤال المريض بالـ Chunks الأكثر صلة.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 4: RAG & Chunking Deep Dive -->
+  <section class="slide">
+    <h2 class="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-blue-500">تفاصيل معمارية الـ RAG والـ Chunking ✂️</h2>
+    <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl max-w-5xl w-full space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-slate-950/60 p-5 rounded-2xl border border-slate-800/80">
+          <h4 class="font-bold text-base text-cyan-400 mb-2">📐 استراتيجية الـ Chunking (Chunking Parameters)</h4>
+          <p class="text-slate-300 text-xs leading-relaxed mb-3">
+            يتم تقطيع كتب ومقالات طب الأمراض التنفسية باستخدام طريقة <span class="text-cyan-300 font-mono">RecursiveCharacterTextSplitter</span>:
+          </p>
+          <ul class="text-slate-400 text-xs space-y-1.5 list-disc list-inside">
+            <li><span class="text-white font-semibold">Chunk Size:</span> 500 - 800 Tokens (لتجنب تشتيت النموذج).</li>
+            <li><span class="text-white font-semibold">Chunk Overlap:</span> 100 - 150 Tokens (15-20% تداخل لعدم انقطاع سياق الجمل الطبية).</li>
+          </ul>
+        </div>
+
+        <div class="bg-slate-950/60 p-5 rounded-2xl border border-slate-800/80">
+          <h4 class="font-bold text-base text-blue-400 mb-2">⚙️ خطوات دمج الـ Context بالـ Prompt</h4>
+          <ol class="text-slate-300 text-xs space-y-2 list-decimal list-inside leading-relaxed">
+            <li>سحب الـ Chunks المناسبة وتنسيقها.</li>
+            <li>إرفاق بيانات الـ Onboarding (العمر + المرض المزمن).</li>
+            <li>صياغة الـ System Prompt لإجبار النموذج بالرد حصراً من الـ Context وإظهار المصدر (Sources).</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 5: Expected Questions -->
+  <section class="slide">
+    <h2 class="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-blue-500">الأسئلة المتوقعة في المناقشة 🎯</h2>
+    <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-4xl w-full space-y-4 text-xs md:text-sm">
+      <div class="border-b border-slate-800 pb-3">
+        <p class="text-cyan-400 font-bold mb-1">س: ليه اخترتم RAG ومش Fine-Tuning للموديل؟</p>
+        <p class="text-slate-300">ج: الـ RAG أسرع وأقل تكلفة، وبيمنع الـ Hallucinations، وبيسمح بتحديث المعلومات الطبية فوراً بإضافة ملفات جديدة بدون إعادة تدريب النموذج.</p>
+      </div>
+      <div class="border-b border-slate-800 pb-3">
+        <p class="text-cyan-400 font-bold mb-1">س: ازاي بتتأكدوا إن الـ RAG مش هيرجع معلومات ملهاش علاقة؟</p>
+        <p class="text-slate-300">ج: عن طريق تحديد درجات التشابه (Similarity Threshold) واستخدام تقنيات Embeddings دقيقة ومخصصة للنصوص الطبية.</p>
+      </div>
+      <div>
+        <p class="text-cyan-400 font-bold mb-1">س: كيف تؤثر بيانات الـ Onboarding على إجابة المساعد؟</p>
+        <p class="text-slate-300">ج: بيتم إرفاق عمر المريض وحالته المرضية داخل الـ System Prompt لإلزام الموديل بتقديم استشارة مناسبة لحالته وفئته العمرية.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 6: Animated Thank You Slide -->
+  <section class="slide">
+    <div class="text-center space-y-6">
+      <div class="pulse-glow inline-block bg-linear-to-r from-cyan-500 to-blue-600 p-8 rounded-full shadow-2xl mb-4">
+        <span class="text-6xl">🩺</span>
+      </div>
+      <h1 class="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-cyan-400 via-blue-400 to-purple-500 tracking-tight">
+        Thank You!
+      </h1>
+      <p class="text-xl text-slate-300 max-w-lg mx-auto font-medium">
+        شكرًا لاستماعكم، ونسعد باستقبال جميع استفساراتكم وأسئلتكم.
+      </p>
+      <div class="pt-4">
+        <span class="px-5 py-2.5 rounded-full bg-slate-900 border border-cyan-500/30 text-cyan-400 text-sm font-semibold">
+          Shaheeq AI • Intelligent Health Assistant
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Controls Footer -->
+  <div class="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-slate-900/80 border border-slate-800 backdrop-blur-md px-6 py-2.5 rounded-full text-xs text-slate-400 z-50">
+    <button id="prevBtn" class="hover:text-cyan-400 transition-colors cursor-pointer">◀ السابق</button>
+    <span id="slideCounter" class="font-semibold text-slate-200">1 / 6</span>
+    <button id="nextBtn" class="hover:text-cyan-400 transition-colors cursor-pointer">التالي ▶</button>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    let currentSlide = 0;
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === index);
+      });
+      document.getElementById('slideCounter').textContent = `${index + 1} / ${slides.length}`;
+    }
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      if (currentSlide < slides.length - 1) { currentSlide++; showSlide(currentSlide); }
+    });
+
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      if (currentSlide > 0) { currentSlide--; showSlide(currentSlide); }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+        if (currentSlide < slides.length - 1) { currentSlide++; showSlide(currentSlide); }
+      } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+        if (currentSlide > 0) { currentSlide--; showSlide(currentSlide); }
+      }
+    });
+  </script>
+</body>
+</html>
