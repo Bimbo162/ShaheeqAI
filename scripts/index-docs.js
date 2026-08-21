@@ -2,7 +2,10 @@ const fs = require("fs");
 const path = require("path");
 const mongoose = require("mongoose");
 const { PDFParse } = require("pdf-parse");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 require("dotenv").config({ path: ".env.local" });
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 const KnowledgeSchema = new mongoose.Schema({
   source: String,
@@ -54,12 +57,20 @@ async function readFileContent(filePath) {
   return null;
 }
 
-async function main() {
-  console.log("🔄 جاري تحميل نموذج الـ embeddings...");
-  const { pipeline } = await import("@xenova/transformers");
-  const embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
+// دالة توليد الـ embedding باستخدام Gemini بدلاً من xenova
+async function getEmbedding(text) {
+  try {
+    const model = genAI.getGenerativeModel({ model: "text-embedding-004" });
+    const result = await model.embedContent(text);
+    return result.embedding.values;
+  } catch (error) {
+    console.error("Error generating embedding with Gemini:", error);
+    return new Array(768).fill(0);
+  }
+}
 
-  console.log("🔗 جاري الاتصال بقاعدة البيانات...");
+async function main() {
+  console.log("🔄 جاري الاتصال بقاعدة البيانات والتحضير...");
   await mongoose.connect(process.env.MONGODB_URI);
 
   const filePaths = getAllFiles(KNOWLEDGE_DIR);
@@ -75,8 +86,7 @@ async function main() {
     console.log(`   → ${chunks.length} جزء`);
 
     for (const chunk of chunks) {
-      const output = await embedder(chunk, { pooling: "mean", normalize: true });
-      const embedding = Array.from(output.data);
+      const embedding = await getEmbedding(chunk);
 
       await Knowledge.create({
         source: relativeName,
