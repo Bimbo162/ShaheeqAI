@@ -53,7 +53,6 @@ async function extractAndSaveMemory(apiKey: string, userId: string, userMessage:
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    // تم تصحيح اسم النموذج إلى النموذج المعتمد السريع
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const extractionPrompt = `
@@ -189,9 +188,8 @@ ${userMemoriesText || "لا توجد ذكريات سابقة."}
       : baseInstructions;
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    // تم تصحيح اسم النموذج هنا أيضاً ليعمل بنجاح
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
       systemInstruction: systemPrompt,
     });
 
