@@ -6,7 +6,7 @@ import { Memory } from "@/models/Memory";
 import Patient from "@/models/Patient"; 
 import { embedText, cosineSimilarity } from "@/lib/embeddings";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // 👈 تحقق من مسار authOptions الصحيح لديم
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 function cleanResponse(text: string): string {
   return text.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
@@ -53,7 +53,8 @@ async function extractAndSaveMemory(apiKey: string, userId: string, userMessage:
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
+    // تم تصحيح اسم النموذج إلى النموذج المعتمد السريع
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const extractionPrompt = `
 أنت جزء من نظام ذكاء اصطناعي. حلل الرسالة التالية واستخرج منها فقط الحقائق المستمرة الخاصة بالمريض مثل (الاسم، العمر، الوظيفة، التشخيص المسبق، مسببات الحساسية عنده، الأدوية التي يستخدمها، المشاكل النفسية/الجسدية المزمنة).
@@ -132,9 +133,8 @@ async function saveChatToPatientHistory(
 
 export async function POST(req: Request) {
   try {
-    // استبدل السطر الحالي بهذه الصياغة:
-const session = (await getServerSession(authOptions as any)) as { user?: { email?: string } } | null;
-const userEmail = session?.user?.email;
+    const session = (await getServerSession(authOptions as any)) as { user?: { email?: string } } | null;
+    const userEmail = session?.user?.email;
     const userId = userEmail || "anonymous_user";
 
     const body = await req.json();
@@ -189,8 +189,9 @@ ${userMemoriesText || "لا توجد ذكريات سابقة."}
       : baseInstructions;
 
     const genAI = new GoogleGenerativeAI(apiKey);
+    // تم تصحيح اسم النموذج هنا أيضاً ليعمل بنجاح
     const model = genAI.getGenerativeModel({
-      model: "gemini-3.1-flash-lite",
+      model: "gemini-1.5-flash",
       systemInstruction: systemPrompt,
     });
 
@@ -216,6 +217,7 @@ ${userMemoriesText || "لا توجد ذكريات سابقة."}
       const result = await chat.sendMessage(currentMessage.content);
       rawReply = result.response.text() || rawReply;
     } catch (genError: any) {
+      console.error("⚠️ خطأ في توليد الرد من Gemini:", genError);
       return NextResponse.json(
         { reply: `خطأ من Gemini: ${genError?.message || "فشل الاتصال"}` },
         { status: 500 }
@@ -234,6 +236,7 @@ ${userMemoriesText || "لا توجد ذكريات سابقة."}
 
     return NextResponse.json({ reply, sources, chatId });
   } catch (error: any) {
+    console.error("❌ خطأ سيرفر داخلي مفصل في API Chat:", error);
     return NextResponse.json(
       { reply: `خطأ سيرفر داخلي: ${error?.message || "مشكلة غير معروفة"}` },
       { status: 500 }
