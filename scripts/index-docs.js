@@ -2,10 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const mongoose = require("mongoose");
 const { PDFParse } = require("pdf-parse");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 require("dotenv").config({ path: ".env.local" });
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 const KnowledgeSchema = new mongoose.Schema({
   source: String,
@@ -15,10 +12,8 @@ const KnowledgeSchema = new mongoose.Schema({
 
 const Knowledge = mongoose.models.Knowledge || mongoose.model("Knowledge", KnowledgeSchema);
 
-// مجلد المعرفة اللي فيه كل المجلدات الفرعية (articles, books, guidelines)
 const KNOWLEDGE_DIR = path.join(__dirname, "..", "knowledge");
 
-// دالة تدور على كل الملفات جوه مجلد وكل المجلدات الفرعية بتاعته
 function getAllFiles(dirPath, allFiles = []) {
   const entries = fs.readdirSync(dirPath, { withFileTypes: true });
   for (const entry of entries) {
@@ -32,7 +27,6 @@ function getAllFiles(dirPath, allFiles = []) {
   return allFiles;
 }
 
-// تقسيم النص لأجزاء صغيرة (chunks) مع تداخل بسيط
 function chunkText(text, chunkSize = 800, overlap = 150) {
   const chunks = [];
   let start = 0;
@@ -57,21 +51,16 @@ async function readFileContent(filePath) {
   return null;
 }
 
-// دالة توليد الـ embedding باستخدام Gemini بدلاً من xenova
-async function getEmbedding(text) {
-  try {
-    const model = genAI.getGenerativeModel({ model: "text-embedding-004" });
-    const result = await model.embedContent(text);
-    return result.embedding.values;
-  } catch (error) {
-    console.error("Error generating embedding with Gemini:", error);
-    return new Array(768).fill(0);
-  }
-}
-
 async function main() {
-  console.log("🔄 جاري الاتصال بقاعدة البيانات والتحضير...");
+  console.log("🔄 جاري تحميل نموذج الـ embeddings...");
+  const { pipeline } = await import("@xenova/transformers");
+  const embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
+
+  console.log("🔗 جاري الاتصال بقاعدة البيانات...");
   await mongoose.connect(process.env.MONGODB_URI);
+
+  console.log("🗑️ جاري مسح الفهرسة القديمة (لعدم توافق أبعاد المتجهات)...");
+  await Knowledge.deleteMany({});
 
   const filePaths = getAllFiles(KNOWLEDGE_DIR);
   console.log(`📚 لقيت ${filePaths.length} ملف`);
@@ -86,7 +75,8 @@ async function main() {
     console.log(`   → ${chunks.length} جزء`);
 
     for (const chunk of chunks) {
-      const embedding = await getEmbedding(chunk);
+      const output = await embedder(chunk, { pooling: "mean", normalize: true });
+      const embedding = Array.from(output.data);
 
       await Knowledge.create({
         source: relativeName,

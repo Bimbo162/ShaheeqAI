@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import Knowledge from "@/models/Knowledge";
-import { Memory } from "@/models/Memory"; 
-import Patient from "@/models/Patient"; 
+import { Memory } from "@/models/Memory";
+import Patient from "@/models/Patient";
 import { embedText, cosineSimilarity } from "@/lib/embeddings";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -18,14 +18,28 @@ async function connectDB() {
   }
 }
 
+let cachedChunks: Array<{ content: string; source: string; embedding: number[] }> | null = null;
+let cacheTimestamp = 0;
+const CACHE_TTL_MS = 10 * 60 * 1000;
+
+async function getAllChunksCached() {
+  const now = Date.now();
+  if (cachedChunks && now - cacheTimestamp < CACHE_TTL_MS) {
+    return cachedChunks;
+  }
+  await connectDB();
+  const chunks = await Knowledge.find({}, { content: 1, embedding: 1, source: 1 }).lean();
+  cachedChunks = chunks as any;
+  cacheTimestamp = now;
+  return cachedChunks!;
+}
+
 async function getRelevantContext(
   message: string,
-  topK = 4
+  topK = 2
 ): Promise<{ contextText: string; sources: string[] }> {
-  await connectDB();
-
   const queryEmbedding = await embedText(message);
-  const allChunks = await Knowledge.find({}, { content: 1, embedding: 1, source: 1 }).lean();
+  const allChunks = await getAllChunksCached();
 
   const scored = allChunks.map((chunk: any) => ({
     content: chunk.content,
@@ -52,8 +66,7 @@ async function extractAndSaveMemory(apiKey: string, userId: string, userMessage:
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    // تم التحديث هنا للنموذج المطلوب
-    const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
     const extractionPrompt = `
 أنت جزء من نظام ذكاء اصطناعي. حلل الرسالة التالية واستخرج منها فقط الحقائق المستمرة الخاصة بالمريض مثل (الاسم، العمر، الوظيفة، التشخيص المسبق، مسببات الحساسية عنده، الأدوية التي يستخدمها، المشاكل النفسية/الجسدية المزمنة).
@@ -85,6 +98,7 @@ async function saveChatToPatientHistory(
 ) {
   try {
     await connectDB();
+    const titleText = userMessage.trim().slice(0, 30) + (userMessage.length > 30 ? "..." : "");
 
     const updated = await Patient.findOneAndUpdate(
       { email: userEmail, "chatHistory.chatId": chatId },
@@ -97,14 +111,15 @@ async function saveChatToPatientHistory(
             ],
           },
         },
-        $set: { "chatHistory.$.updatedAt": new Date() },
+        $set: {
+          "chatHistory.$.updatedAt": new Date(),
+          "chatHistory.$.title": titleText,
+        },
       },
       { new: true }
     );
 
     if (!updated) {
-      const titleText = userMessage.trim().slice(0, 30) + (userMessage.length > 30 ? "..." : "");
-      
       await Patient.findOneAndUpdate(
         { email: userEmail },
         {
@@ -123,7 +138,7 @@ async function saveChatToPatientHistory(
         }
       );
     }
-    console.log(`✅ تم حفظ المحادثة لـ: ${userEmail}`);
+    console.log(`✅ تم حفظ المحادثة وتحديث العنوان لـ: ${userEmail}`);
   } catch (err) {
     console.error("⚠️ خطأ في حفظ المحادثة بـ MongoDB:", err);
   }
@@ -151,25 +166,26 @@ export async function POST(req: Request) {
     const lastUserMessage = [...conversationMessages].reverse().find((m) => m.role === "user")?.content || "";
 
     let userMemoriesText = "";
-    try {
-      await connectDB();
-      const userMemories = await Memory.find({ userId });
-      if (userMemories.length > 0) {
-        userMemoriesText = userMemories.map((m) => `- ${m.fact}`).join("\n");
-      }
-    } catch (memError) {
-      console.error("⚠️ خطأ في جلب الذاكرة:", memError);
-    }
-
     let context = "";
     let sources: string[] = [];
-    try {
-      const result = await getRelevantContext(lastUserMessage);
-      context = result.contextText;
-      sources = result.sources;
-    } catch (ragError: any) {
-      console.error("⚠️ خطأ في البحث عن المعرفة (RAG):", ragError);
-    }
+
+    await Promise.all([
+      connectDB()
+        .then(async () => {
+          const userMemories = await Memory.find({ userId });
+          if (userMemories.length > 0) {
+            userMemoriesText = userMemories.map((m) => `- ${m.fact}`).join("\n");
+          }
+        })
+        .catch((err) => console.error("⚠️ خطأ في جلب الذاكرة:", err)),
+
+      getRelevantContext(lastUserMessage)
+        .then((result) => {
+          context = result.contextText;
+          sources = result.sources;
+        })
+        .catch((err) => console.error("⚠️ خطأ في البحث عن المعرفة:", err)),
+    ]);
 
     const baseInstructions = `أنت مساعد طبي افتراضي متخصص في أمراض الجهاز التنفسي (خصوصًا الربو)، تتحدث بأسلوب طبيعي ومختصر زي ما يتكلم طبيب حقيقي مع مريضه.
 
@@ -187,9 +203,9 @@ ${userMemoriesText || "لا توجد ذكريات سابقة."}
       : baseInstructions;
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    // تم التحديث هنا للنموذج المطلوب أيضاً
+
     const model = genAI.getGenerativeModel({
-      model: "gemini-3.6-flash",
+      model: "gemini-2.5-flash-lite",
       systemInstruction: systemPrompt,
     });
 
@@ -225,12 +241,14 @@ ${userMemoriesText || "لا توجد ذكريات سابقة."}
     const reply = cleanResponse(rawReply);
 
     if (userEmail) {
-      await saveChatToPatientHistory(userEmail, chatId, lastUserMessage, reply);
+      saveChatToPatientHistory(userEmail, chatId, lastUserMessage, reply);
     } else {
       console.warn("⚠️ لم يتم حفظ المحادثة لأن المستخدم غير مسجل دخول (No Session Email)");
     }
 
-    extractAndSaveMemory(apiKey, userId, lastUserMessage);
+    if (conversationMessages.length % 3 === 0) {
+      extractAndSaveMemory(apiKey, userId, lastUserMessage);
+    }
 
     return NextResponse.json({ reply, sources, chatId });
   } catch (error: any) {

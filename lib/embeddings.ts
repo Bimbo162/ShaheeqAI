@@ -1,17 +1,18 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { pipeline } from "@xenova/transformers";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+let embedder: any = null;
+
+export async function getEmbedder() {
+  if (!embedder) {
+    embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
+  }
+  return embedder;
+}
 
 export async function embedText(text: string): Promise<number[]> {
-  try {
-    const model = genAI.getGenerativeModel({ model: "text-embedding-004" });
-    const result = await model.embedContent(text);
-    return result.embedding.values;
-  } catch (error) {
-    console.error("Error generating embedding with Gemini:", error);
-    // إرجاع مصفوفة فارغة لتجنب انهيار التطبيق
-    return new Array(768).fill(0);
-  }
+  const model = await getEmbedder();
+  const output = await model(text, { pooling: "mean", normalize: true });
+  return Array.from(output.data);
 }
 
 export function cosineSimilarity(a: number[], b: number[]): number {
